@@ -1,0 +1,51 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/clearflow?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  # 说明：建表与种子数据由 db/schema.sql、db/data.sql 幂等脚本提供（无 Flyway），
+  # 脚本不随应用自动执行，由使用方手动执行初始化
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    banner: true
+
+clearflow:
+  # 内置系统管理员登录账号（唯一）：可看全部数据、操作一切，独立于 perm 角色。
+  # 账号名为 admin（密码见 db/data.sql 约定：默认 123456）
+  admin-login: admin
+  jwt:
+    secret: clearflow-dev-jwt-secret-key-2026-please-change-in-production-0123456789abcdef
+    expire-hours: 24
+  # RustFS 对象存储（S3 协议兼容），附件上传模块（M3）读取此配置
+  rustfs:
+    endpoint: http://127.0.0.1:9000        # RustFS S3 API 地址
+    access-key: rustfsadmin        # Access Key（RustFS 控制台创建）
+    secret-key: rustfsadmin        # Secret Key
+    bucket: clearflow-attachments           # 桶名（私有桶 + 预签名读取）
+    region: us-east-1                       # S3 协议要求，RustFS 默认即可
+    presign-expiry-minutes: 60              # 预签名 URL 有效期
+    max-upload-mb: 20                       # 单文件大小上限
+  # AI 需求拆分（OpenAI 兼容 /chat/completions）
+  # api-key 留空时自动走 mock（本地规则生成演示草稿）；配置 Key 即调用真实模型
+  ai:
+    enabled: true
+    mock: ${CLEARFLOW_AI_MOCK:false}        # true = 强制使用演示数据
+    base-url: ${CLEARFLOW_AI_BASE_URL:https://token.sensenova.cn/v1}
+    api-key: ${CLEARFLOW_AI_KEY:}           # 只放环境变量，勿提交到仓库
+    model: ${CLEARFLOW_AI_MODEL:sensenova-6.8-flash-lite}
+    timeout-seconds: 60
+
+logging:
+  level:
+    dev.clearflow: info
+

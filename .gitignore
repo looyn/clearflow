@@ -1,0 +1,6 @@
+/clearflow-web/dist
+/clearflow-web/node_modules
+/attachments
+/clearflow-server/.idea
+/clearflow-server/target
+/.trae

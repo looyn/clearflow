@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>清流 · 研发概览</title>
+<style>
+  :root{
+    --bg:#F5F6F7;
+    --card:#FFFFFF;
+    --border:#E5E6EB;
+    --t1:#1F2329;
+    --t2:#51565F;
+    --t3:#8F959E;
+    --primary:#3370FF;
+    --primary-light:#7FA6FF;
+    --primary-bg:#EAF1FF;
+    --green:#2EA86E;
+    --green-bg:#E8F7EF;
+    --red:#F54A45;
+    --red-bg:#FEECEB;
+    --amber:#D25F00;
+    --amber-bg:#FFF3E8;
+    --track:#EDF0F3;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg);
+    color:var(--t1);
+    font-size:14px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    display:flex;min-height:100vh;
+  }
+  ::selection{background:var(--primary-bg);color:var(--primary)}
+
+  /* ============ 侧边导航 ============ */
+  .sidebar{
+    width:224px;flex:none;
+    background:var(--card);
+    border-right:1px solid var(--border);
+    position:sticky;top:0;height:100vh;
+    display:flex;flex-direction:column;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:20px 20px 16px}
+  .logo{
+    width:30px;height:30px;flex:none;border-radius:8px;
+    background:var(--primary);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .brand-name{font-size:15px;font-weight:600}
+  .brand-sub{font-size:11px;color:var(--t3);margin-top:1px}
+  nav{flex:1;padding:6px 12px}
+  .nav-title{font-size:11px;color:var(--t3);padding:14px 12px 6px}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:7px 12px;margin-bottom:2px;
+    border-radius:8px;font-size:13.5px;color:var(--t2);
+  }
+  .nav-item svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .nav-item.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+  .sidebar-foot{
+    border-top:1px solid var(--border);
+    padding:14px 24px;font-size:11px;color:var(--t3);
+  }
+
+  /* ============ 主区 ============ */
+  .main{flex:1;min-width:0}
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    background:var(--card);border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:14px;
+    height:56px;padding:0 28px;
+  }
+  .proj{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;cursor:pointer}
+  .proj .caret{width:12px;height:12px;stroke:var(--t3);stroke-width:2;fill:none;stroke-linecap:round}
+  .chip{
+    font-size:11px;padding:2px 8px;border-radius:6px;
+    background:var(--primary-bg);color:var(--primary);font-weight:500;
+  }
+  .topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .search{
+    width:230px;height:32px;background:var(--bg);
+    border-radius:8px;display:flex;align-items:center;gap:8px;
+    padding:0 12px;font-size:12.5px;color:var(--t3);
+  }
+  .search svg{width:14px;height:14px;stroke:var(--t3);stroke-width:1.8;fill:none;stroke-linecap:round}
+  .search .kbd{margin-left:auto;font-size:11px;color:var(--t3)}
+  .btn{
+    height:32px;padding:0 14px;border:none;border-radius:8px;
+    background:var(--primary);color:#fff;font-size:13px;font-weight:500;
+    display:flex;align-items:center;gap:6px;cursor:pointer;
+    font-family:inherit;
+  }
+  .btn svg{width:14px;height:14px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round}
+  .icon-btn{position:relative;width:32px;height:32px;border:none;background:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;border-radius:8px}
+  .icon-btn svg{width:18px;height:18px;stroke:var(--t2);stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .icon-btn i{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid #fff}
+  .ava{
+    width:30px;height:30px;border-radius:50%;color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:600;flex:none;
+  }
+  .ava.blue{background:var(--primary)} .ava.teal{background:#00B2A9}
+  .ava.orange{background:#FF7D00} .ava.green{background:var(--green)}
+  .ava.sky{background:#0FA6E8} .ava.ink{background:#646A73}
+
+  .content{max-width:1200px;margin:0 auto;padding:24px 28px 56px}
+
+  /* ============ 卡片通用 ============ */
+  .card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:12px;padding:20px;
+  }
+  .card-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .card-title{font-size:15px;font-weight:600}
+  .card-extra{margin-left:auto;font-size:12px;color:var(--t3);display:flex;align-items:center;gap:10px}
+
+  /* ============ 页头 ============ */
+  .page-head{display:flex;align-items:flex-end;margin-bottom:20px}
+  h1{font-size:24px;font-weight:600;letter-spacing:.01em}
+  .page-meta{font-size:13px;color:var(--t3);margin-top:6px}
+  .page-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .countdown{
+    font-size:12.5px;padding:6px 12px;border-radius:8px;
+    background:var(--primary-bg);color:var(--primary);font-weight:500;
+  }
+  .countdown b{font-weight:600}
+  .ghost-btn{
+    height:32px;padding:0 14px;border:1px solid var(--border);border-radius:8px;
+    background:var(--card);color:var(--t2);font-size:13px;cursor:pointer;
+    display:flex;align-items:center;gap:6px;font-family:inherit;
+  }
+
+  /* ============ KPI ============ */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+  .kpi-label{font-size:12.5px;color:var(--t3)}
+  .kpi-num{font-size:30px;font-weight:600;margin-top:8px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .kpi-num small{font-size:15px;font-weight:500;color:var(--t2)}
+  .kpi-foot{margin-top:10px;display:flex;align-items:center;gap:8px}
+  .trend{font-size:11.5px;font-weight:500;padding:1px 7px;border-radius:5px}
+  .trend.good{background:var(--green-bg);color:var(--green)}
+  .trend.bad{background:var(--red-bg);color:var(--red)}
+  .kpi-note{font-size:12px;color:var(--t3)}
+  .kpi-bar{margin-top:12px;height:6px;border-radius:3px;background:var(--track);overflow:hidden}
+  .kpi-bar i{display:block;height:100%;border-radius:3px;background:var(--primary)}
+
+  /* ============ 双栏 ============ */
+  .cols-2{display:grid;grid-template-columns:1.65fr 1fr;gap:16px;margin-bottom:16px}
+
+  /* 迭代 */
+  .state-tag{font-size:11px;color:var(--green);background:var(--green-bg);padding:2px 8px;border-radius:6px;font-weight:500}
+  .bar{display:flex;gap:4px;height:12px;border-radius:6px;overflow:hidden}
+  .bar i{display:block;height:100%;animation:grow 1s ease-out both}
+  .bar .b-done{background:var(--primary);width:68%}
+  .bar .b-doing{background:var(--primary-light);width:20%;animation-delay:.12s}
+  .bar .b-todo{background:var(--track);width:12%;animation-delay:.24s}
+  @keyframes grow{from{width:0}}
+  .legend{display:flex;gap:20px;margin-top:12px;font-size:12.5px;color:var(--t2)}
+  .legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:0}
+  .iter-stats{display:flex;margin-top:18px;border-top:1px solid var(--border);padding-top:16px}
+  .iter-stats div{flex:1;padding-left:20px;border-left:1px solid var(--border)}
+  .iter-stats div:first-child{border-left:none;padding-left:0}
+  .iter-stats .v{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+  .iter-stats .k{font-size:12px;color:var(--t3);margin-top:2px}
+  .miles{display:flex;margin-top:22px}
+  .mile{flex:1;position:relative;padding-top:20px}
+  .miles::before{content:'';position:absolute;top:4.5px;left:8px;right:8px;height:2px;background:var(--track);border-radius:1px}
+  .mile::before{
+    content:'';position:absolute;top:0;left:0;width:9px;height:9px;border-radius:50%;
+    background:#fff;border:2px solid #C9CDD4;
+  }
+  .mile.done::before{background:var(--primary);border-color:var(--primary)}
+  .mile.now::before{background:#fff;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-bg)}
+  .mile .d{font-size:11.5px;color:var(--t3);font-variant-numeric:tabular-nums}
+  .mile .n{font-size:12.5px;font-weight:500;margin-top:2px}
+  .mile.now .n{color:var(--primary)}
+
+  /* 团队负载 */
+  .load-row{
+    display:grid;grid-template-columns:28px 1fr 110px 44px;gap:12px;
+    align-items:center;padding:8px 0;
+  }
+  .load-ava{width:28px;height:28px;font-size:11.5px}
+  .load-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .load-name small{font-size:11px;color:var(--t3);font-weight:400;margin-left:6px}
+  .load-track{height:8px;border-radius:4px;background:var(--track);overflow:hidden}
+  .load-fill{display:block;height:100%;border-radius:4px;animation:grow 1.1s ease-out both}
+  .load-pct{font-size:12px;color:var(--t2);text-align:right;font-variant-numeric:tabular-nums}
+  .over .load-fill{background:var(--red)} .over .load-pct{color:var(--red);font-weight:600}
+  .warm .load-fill{background:#FFA53D} .cool .load-fill{background:var(--primary)}
+  .load-note{margin-top:12px;font-size:12px;color:var(--t3);border-top:1px solid var(--border);padding-top:12px}
+
+  /* ============ 看板 ============ */
+  .board{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+  .board{background:none;border:none;padding:0;border-radius:0}
+  .col{background:#F2F3F5;border-radius:12px;padding:10px}
+  .col-head{display:flex;align-items:center;gap:8px;padding:6px 8px 10px}
+  .col-head .nm{font-size:13.5px;font-weight:600}
+  .col-head .ct{font-size:11.5px;color:var(--t2);background:#fff;border-radius:5px;padding:0 7px;line-height:18px;font-variant-numeric:tabular-nums}
+  .cards{display:flex;flex-direction:column;gap:8px}
+  .task{
+    background:var(--card);border-radius:10px;padding:12px 13px;
+    box-shadow:0 1px 2px rgba(31,35,41,.04);
+  }
+  .task-top{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+  .tag{font-size:11px;padding:1px 7px;border-radius:5px;font-weight:500}
+  .tag.fe{background:var(--primary-bg);color:var(--primary)}
+  .tag.be{background:var(--green-bg);color:var(--green)}
+  .tag.qa{background:var(--amber-bg);color:var(--amber)}
+  .tag.de{background:var(--track);color:var(--t2)}
+  .prio{margin-left:auto;font-size:11px;font-weight:600;padding:1px 6px;border-radius:5px}
+  .prio.p0{background:var(--red-bg);color:var(--red)}
+  .prio.p1{background:var(--amber-bg);color:var(--amber)}
+  .prio.p2{background:var(--track);color:var(--t3)}
+  .task h4{font-size:13.5px;font-weight:500;line-height:1.45}
+  .task-foot{display:flex;align-items:center;gap:7px;margin-top:10px}
+  .mini-ava{width:20px;height:20px;font-size:9.5px;border-radius:50%}
+  .who{font-size:12px;color:var(--t3)}
+  .due{margin-left:auto;font-size:11.5px;color:var(--t3);font-variant-numeric:tabular-nums}
+  .due.hot{color:var(--red);font-weight:500}
+  .task.done{opacity:.6}
+  .task.done .fin{margin-left:auto;font-size:11px;color:var(--green);font-weight:500}
+  .col-more{padding:10px 8px 4px;font-size:12px;color:var(--t3);text-align:center}
+
+  /* ============ 风险 / 动态 ============ */
+  .risk-row{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+  .risk-row:last-child{border-bottom:none;padding-bottom:0}
+  .risk-row + .risk-row{padding-top:12px}
+  .risk-tag{flex:none;font-size:11px;font-weight:500;padding:2px 8px;border-radius:5px;height:fit-content}
+  .risk-tag.b{background:var(--red-bg);color:var(--red)}
+  .risk-tag.r{background:var(--amber-bg);color:var(--amber)}
+  .risk-tag.n{background:var(--primary-bg);color:var(--primary)}
+  .risk-title{font-size:13.5px}
+  .risk-meta{font-size:12px;color:var(--t3);margin-top:3px}
+
+  .act-row{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border)}
+  .act-row:last-child{border-bottom:none;padding-bottom:0}
+  .act-row + .act-row{padding-top:11px}
+  .act-time{flex:none;font-size:12px;color:var(--t3);padding-top:2px;font-variant-numeric:tabular-nums}
+  .act-text{font-size:13px}
+  .act-text b{font-weight:600}
+  .act-text .mr{color:var(--t3)}
+  .act-text .hl{color:var(--red);font-weight:500}
+
+  /* ============ 页脚 ============ */
+  .foot{
+    display:flex;align-items:center;margin-top:4px;padding:0 4px;
+    font-size:12px;color:var(--t3);
+  }
+  .foot .meta{margin-left:auto}
+
+  /* ============ 入场动画 ============ */
+  .rise{animation:rise .45s ease-out both}
+  .d1{animation-delay:.04s}.d2{animation-delay:.1s}.d3{animation-delay:.16s}
+  .d4{animation-delay:.22s}.d5{animation-delay:.28s}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  /* ============ 响应式 ============ */
+  @media (max-width:1150px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .cols-2{grid-template-columns:1fr}
+    .board{grid-template-columns:repeat(2,1fr)}
+  }
+  @media (max-width:880px){
+    .sidebar,.search{display:none}
+    .content{padding:20px 16px 48px}
+    .topbar{padding:0 16px}
+    .board{grid-template-columns:1fr}
+    .page-right .ghost-btn{display:none}
+  }
+</style>
+</head>
+<body>
+
+  <!-- 侧边导航 -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">
+        <svg width="16" height="16" viewBox="0 0 21 16"><g fill="#fff"><rect x="3" y="2" width="3.6" height="12" rx="1.2"/><rect x="8.7" y="2" width="3.6" height="8" rx="1.2"/><rect x="14.4" y="2" width="3.6" height="10" rx="1.2"/></g></svg>
+      </div>
+      <div>
+        <div class="brand-name">清流</div>
+        <div class="brand-sub">研发项目管理</div>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-title">工作台</div>
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.8V20h13V9.8"/></svg>概览
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="12" cy="10" r="2.4"/><path d="M7.6 19c.8-2.3 2.4-3.5 4.4-3.5s3.6 1.2 4.4 3.5"/></svg>我的工作
+      </div>
+      <div class="nav-title">研发</div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M4.5 13 6.6 6.4A2 2 0 0 1 8.5 5h7a2 2 0 0 1 1.9 1.4L19.5 13"/><path d="M4.5 13v5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5"/><path d="M4.5 13H9l1.3 2.4h3.4L15 13h4.5"/></svg>需求池
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2.5"/><path d="M8 3.2V7M16 3.2V7M4 10.5h16"/></svg>迭代规划
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="4.6" height="16" rx="1.4"/><rect x="10.4" y="4" width="4.6" height="10" rx="1.4"/><rect x="16.8" y="4" width="3.2" height="13" rx="1.4"/></svg>任务看板
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="4.8"/><path d="M9.8 9.4a2.8 2.8 0 0 1 4.4 0"/><path d="M12 8.7V6.3M8 10.5 6.2 8.7M16 10.5l1.8-1.8M7.2 13.5H4.6M19.4 13.5h-2.6M8 16.5l-1.8 1.8M16 16.5l1.8 1.8"/></svg>缺陷追踪
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="m8.5 8-4.2 4 4.2 4M15.5 8l4.2 4-4.2 4"/></svg>代码评审
+      </div>
+      <div class="nav-title">度量</div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="m4 17 5-5 3.5 3.5L20 9"/><path d="M14.8 9H20v5.2"/></svg>燃尽与流速
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3 2.1"/></svg>工时统计
+      </div>
+      <div class="nav-title">设置</div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><path d="M3.8 19c.7-3 2.7-4.6 5.2-4.6s4.5 1.6 5.2 4.6"/><path d="M15.5 6.3a3.2 3.2 0 0 1 0 5.6M17.3 14.7c1.6.7 2.7 2.1 3.1 4.3"/></svg>成员与权限
+      </div>
+    </nav>
+    <div class="sidebar-foot">清流 v2.4.0</div>
+  </aside>
+
+  <!-- 主区 -->
+  <div class="main">
+    <header class="topbar">
+      <div class="proj">电商中台重构计划
+        <svg class="caret" viewBox="0 0 12 12"><path d="m2.5 4.5 3.5 3.5 3.5-3.5"/></svg>
+      </div>
+      <span class="chip">S24 进行中</span>
+      <div class="topbar-right">
+        <div class="search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+          搜索任务、缺陷、MR<span class="kbd">⌘K</span>
+        </div>
+        <button class="btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>新建任务</button>
+        <button class="icon-btn">
+          <svg viewBox="0 0 24 24"><path d="M6 9.5a6 6 0 1 1 12 0c0 4.8 1.8 5.8 1.8 5.8H4.2S6 14.3 6 9.5"/><path d="M10 19.5a2.2 2.2 0 0 0 4 0"/></svg>
+          <i></i>
+        </button>
+        <div class="ava blue">陈</div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- 页头 -->
+      <div class="page-head rise d1">
+        <div>
+          <h1>研发概览</h1>
+          <div class="page-meta">2026 年第 41 周 · 10 月 9 日 周五 · 数据更新于 14:32</div>
+        </div>
+        <div class="page-right">
+          <button class="ghost-btn">导出周报</button>
+          <div class="countdown">S24 · 距发布还有 <b>4 天</b></div>
+        </div>
+      </div>
+
+      <!-- KPI -->
+      <div class="kpis rise d2">
+        <div class="card">
+          <div class="kpi-label">需求吞吐（本周）</div>
+          <div class="kpi-num">23</div>
+          <div class="kpi-foot"><span class="trend good">↑ 12%</span><span class="kpi-note">较上周</span></div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">迭代完成度</div>
+          <div class="kpi-num">68<small>%</small></div>
+          <div class="kpi-foot"><span class="kpi-note">41 / 60 项任务已关闭</span></div>
+          <div class="kpi-bar"><i style="width:68%"></i></div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">缺陷存量（P0 / P1）</div>
+          <div class="kpi-num">14</div>
+          <div class="kpi-foot"><span class="trend good">↓ 6</span><span class="kpi-note">较上周 · 收敛中</span></div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">按时交付率</div>
+          <div class="kpi-num">92.4<small>%</small></div>
+          <div class="kpi-foot"><span class="kpi-note">近四迭代均值 · 目标 90%</span></div>
+        </div>
+      </div>
+
+      <!-- 迭代 + 团队 -->
+      <div class="cols-2">
+        <div class="card rise d3">
+          <div class="card-head">
+            <span class="card-title">当前迭代 · 支付网关重构</span>
+            <span class="state-tag">进行中</span>
+            <span class="card-extra">10 月 14 日发布</span>
+          </div>
+          <div class="bar"><i class="b-done"></i><i class="b-doing"></i><i class="b-todo"></i></div>
+          <div class="legend">
+            <span><i style="background:var(--primary)"></i>已完成 41</span>
+            <span><i style="background:var(--primary-light)"></i>进行中 12</span>
+            <span><i style="background:#D8DBE0"></i>未开始 7</span>
+            <span style="margin-left:auto;color:var(--t3)">合计 60</span>
+          </div>
+          <div class="iter-stats">
+            <div><div class="v">23</div><div class="k">关联需求</div></div>
+            <div><div class="v">8</div><div class="k">新增缺陷</div></div>
+            <div><div class="v">96%</div><div class="k">用例通过率</div></div>
+            <div><div class="v">318</div><div class="k">累计提交</div></div>
+          </div>
+          <div class="miles">
+            <div class="mile done"><div class="d">09.28</div><div class="n">需求冻结</div></div>
+            <div class="mile done"><div class="d">10.06</div><div class="n">接口联调</div></div>
+            <div class="mile now"><div class="d">10.10</div><div class="n">全链路压测</div></div>
+            <div class="mile"><div class="d">10.12</div><div class="n">回归测试</div></div>
+            <div class="mile"><div class="d">10.14</div><div class="n">正式发布</div></div>
+          </div>
+        </div>
+
+        <div class="card rise d4">
+          <div class="card-head">
+            <span class="card-title">团队负载</span>
+            <span class="card-extra">6 名成员</span>
+          </div>
+          <div class="load-row warm">
+            <div class="ava orange load-ava">陈</div>
+            <div class="load-name">陈砚舟<small>前端负责人</small></div>
+            <div class="load-track"><i class="load-fill" style="width:86%"></i></div>
+            <div class="load-pct">86%</div>
+          </div>
+          <div class="load-row over">
+            <div class="ava teal load-ava">林</div>
+            <div class="load-name">林晚<small>后端</small></div>
+            <div class="load-track"><i class="load-fill" style="width:100%"></i></div>
+            <div class="load-pct">112%</div>
+          </div>
+          <div class="load-row cool">
+            <div class="ava sky load-ava">沈</div>
+            <div class="load-name">沈叙白<small>测试</small></div>
+            <div class="load-track"><i class="load-fill" style="width:64%"></i></div>
+            <div class="load-pct">64%</div>
+          </div>
+          <div class="load-row cool">
+            <div class="ava green load-ava">顾</div>
+            <div class="load-name">顾之遥<small>前端</small></div>
+            <div class="load-track"><i class="load-fill" style="width:78%"></i></div>
+            <div class="load-pct">78%</div>
+          </div>
+          <div class="load-row cool">
+            <div class="ava blue load-ava">苏</div>
+            <div class="load-name">苏叶<small>产品</small></div>
+            <div class="load-track"><i class="load-fill" style="width:52%"></i></div>
+            <div class="load-pct">52%</div>
+          </div>
+          <div class="load-row warm">
+            <div class="ava ink load-ava">陆</div>
+            <div class="load-name">陆沉<small>运维</small></div>
+            <div class="load-track"><i class="load-fill" style="width:95%"></i></div>
+            <div class="load-pct">95%</div>
+          </div>
+          <div class="load-note">负载 = 在办任务估时 ÷ 本迭代剩余容量，红色为超载</div>
+        </div>
+      </div>
+
+      <!-- 看板 -->
+      <div class="board rise d5">
+        <div class="col">
+          <div class="col-head"><span class="nm">待处理</span><span class="ct">4</span></div>
+          <div class="cards">
+            <article class="task">
+              <div class="task-top"><span class="tag be">后端</span><span class="prio p0">P0</span></div>
+              <h4>退款回调幂等处理，防重复入账</h4>
+              <div class="task-foot"><span class="ava teal mini-ava">林</span><span class="who">林晚</span><span class="due hot">10.10</span></div>
+            </article>
+            <article class="task">
+              <div class="task-top"><span class="tag qa">测试</span><span class="prio p1">P1</span></div>
+              <h4>压测脚本：收银台峰值 5k QPS 场景</h4>
+              <div class="task-foot"><span class="ava sky mini-ava">沈</span><span class="who">沈叙白</span><span class="due">10.11</span></div>
+            </article>
+            <article class="task">
+              <div class="task-top"><span class="tag fe">前端</span><span class="prio p2">P2</span></div>
+              <h4>对账单导出 Excel 样式还原模板</h4>
+              <div class="task-foot"><span class="ava green mini-ava">顾</span><span class="who">顾之遥</span><span class="due">10.13</span></div>
+            </article>
+            <article class="task">
+              <div class="task-top"><span class="tag de">设计</span><span class="prio p2">P2</span></div>
+              <h4>风控规则配置页视觉走查</h4>
+              <div class="task-foot"><span class="ava blue mini-ava">苏</span><span class="who">苏叶</span><span class="due">待排期</span></div>
+            </article>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="col-head"><span class="nm">进行中</span><span class="ct">5</span></div>
+          <div class="cards">
+            <article class="task">
+              <div class="task-top"><span class="tag fe">前端</span><span class="prio p0">P0</span></div>
+              <h4>支付方式选择组件重构</h4>
+              <div class="task-foot"><span class="ava orange mini-ava">陈</span><span class="who">陈砚舟</span><span class="due hot">10.09</span></div>
+            </article>
+            <article class="task">
+              <div class="task-top"><span class="tag be">后端</span><span class="prio p0">P0</span></div>
+              <h4>渠道网关超时熔断与降级</h4>
+              <div class="task-foot"><span class="ava teal mini-ava">林</span><span class="who">林晚</span><span class="due hot">10.09</span></div>
+            </article>
+            <article class="task">
+              <div class="task-top"><span class="tag be">后端</span><span class="prio p1">P1</span></div>
+              <h4>分账流水 T+1 对账任务</h4>
+              <div class="task-foot"><span class="ava teal mini-ava">林</span><span class="who">林晚</span><span class="due">10.10</span></div>
+            </article>
+            <article class="task">
+              <div class="task-top"><span class="tag fe">前端</span><span class="prio p1">P1</span></div>
+              <h4>收银台灰度开关接入</h4>
+              <div class="task-foot"><span class="ava green mini-ava">顾</span><span class="who">顾之遥</span><span class="due">10.11</span></div>
+            </article>
+            <article class="task">
+              <div class="task-top"><span class="tag qa">测试</span><span class="prio p1">P1</span></div>
+              <h4>自动化用例补齐（32/60）</h4>
+              <div class="task-foot"><span class="ava sky mini-ava">沈</span><span class="who">沈叙白</span><span class="due">10.12</span></div>
+            </article>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="col-head"><span class="nm">待验收</span><span class="ct">3</span></div>
+          <div class="cards">
+            <article class="task">
+              <div class="task-top"><span class="tag be">后端</span><span class="prio p0">P0</span></div>
+              <h4>退款状态机迁移至新领域模型</h4>
+              <div class="task-foot"><span class="ava blue mini-ava">苏</span><span class="who">苏叶验收</span><span class="due">今日</span></div>
+            </article>
+            <article class="task">
+              <div class="task-top"><span class="tag fe">前端</span><span class="prio p1">P1</span></div>
+              <h4>银行卡四要素校验组件</h4>
+              <div class="task-foot"><span class="ava green mini-ava">顾</span><span class="who">顾之遥</span><span class="due">10.10</span></div>
+            </article>
+            <article class="task">
+              <div class="task-top"><span class="tag be">后端</span><span class="prio p2">P2</span></div>
+              <h4>对账差异报表查询接口</h4>
+              <div class="task-foot"><span class="ava blue mini-ava">苏</span><span class="who">苏叶验收</span><span class="due">10.11</span></div>
+            </article>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="col-head"><span class="nm">已完成</span><span class="ct">41</span></div>
+          <div class="cards">
+            <article class="task done">
+              <div class="task-top"><span class="tag be">后端</span><span class="fin">✓ 已完成</span></div>
+              <h4>统一支付路由网关</h4>
+              <div class="task-foot"><span class="ava teal mini-ava">林</span><span class="who">林晚</span><span class="due">10.07</span></div>
+            </article>
+            <article class="task done">
+              <div class="task-top"><span class="tag fe">前端</span><span class="fin">✓ 已完成</span></div>
+              <h4>收银台新版视觉还原</h4>
+              <div class="task-foot"><span class="ava orange mini-ava">陈</span><span class="who">陈砚舟</span><span class="due">10.06</span></div>
+            </article>
+            <article class="task done">
+              <div class="task-top"><span class="tag qa">测试</span><span class="fin">✓ 已完成</span></div>
+              <h4>核心链路回归用例集</h4>
+              <div class="task-foot"><span class="ava sky mini-ava">沈</span><span class="who">沈叙白</span><span class="due">10.05</span></div>
+            </article>
+            <article class="task done">
+              <div class="task-top"><span class="tag be">后端</span><span class="fin">✓ 已完成</span></div>
+              <h4>商户进件接口 v2</h4>
+              <div class="task-foot"><span class="ava teal mini-ava">林</span><span class="who">林晚</span><span class="due">10.04</span></div>
+            </article>
+          </div>
+          <div class="col-more">查看全部 41 项 →</div>
+        </div>
+      </div>
+
+      <!-- 风险 + 动态 -->
+      <div class="cols-2" style="margin-bottom:24px">
+        <div class="card rise d5">
+          <div class="card-head">
+            <span class="card-title">风险与阻塞</span>
+            <span class="card-extra">3 项待跟进</span>
+          </div>
+          <div class="risk-row">
+            <span class="risk-tag b">阻塞</span>
+            <div>
+              <div class="risk-title">渠道方联调环境不稳定，分账联调被迫中断</div>
+              <div class="risk-meta">责任人 林晚 · 已持续 2 天 · 影响接口联调里程碑</div>
+            </div>
+          </div>
+          <div class="risk-row">
+            <span class="risk-tag r">风险</span>
+            <div>
+              <div class="risk-title">压测环境仅 4C8G，无法模拟 5k QPS 峰值场景</div>
+              <div class="risk-meta">责任人 陆沉 · 压测节点 10.10 · 需临时扩容审批</div>
+            </div>
+          </div>
+          <div class="risk-row">
+            <span class="risk-tag n">提示</span>
+            <div>
+              <div class="risk-title">支付合规评审尚未排期，发布前需完成</div>
+              <div class="risk-meta">责任人 苏叶 · 截止 10.13 · 已同步法务侧</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card rise d5">
+          <div class="card-head">
+            <span class="card-title">最近动态</span>
+            <span class="card-extra">今日</span>
+          </div>
+          <div class="act-row">
+            <span class="act-time">14:20</span>
+            <div class="act-text"><b>林晚</b> 关闭缺陷 <span class="mr">#B-231</span>「退款金额精度丢失」</div>
+          </div>
+          <div class="act-row">
+            <span class="act-time">13:47</span>
+            <div class="act-text"><b>陈砚舟</b> 提交代码评审 <span class="mr">MR !482</span>「收银台组件重构」</div>
+          </div>
+          <div class="act-row">
+            <span class="act-time">11:32</span>
+            <div class="act-text"><b>沈叙白</b> 更新用例集 S24-回归 · 通过率 96%</div>
+          </div>
+          <div class="act-row">
+            <span class="act-time">10:05</span>
+            <div class="act-text"><b>苏叶</b> 变更需求 R-107 优先级 <span class="hl">P1 → P0</span></div>
+          </div>
+          <div class="act-row">
+            <span class="act-time">09:18</span>
+            <div class="act-text"><b>陆沉</b> 发布 <span class="mr">v2.24.0-rc.3</span> 至预发环境</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 页脚 -->
+      <footer class="foot rise d5">
+        <span>清流 ClearFlow · 让研发协作更高效</span>
+        <span class="meta">v2.4.0 · 数据每 5 分钟自动同步</span>
+      </footer>
+
+    </main>
+  </div>
+
+</body>
+</html>

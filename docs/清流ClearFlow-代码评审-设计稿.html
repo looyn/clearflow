@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>清流 · 代码评审</title>
+<style>
+  :root{
+    --bg:#F5F6F7; --card:#FFFFFF; --border:#E5E6EB;
+    --t1:#1F2329; --t2:#51565F; --t3:#8F959E;
+    --primary:#3370FF; --primary-light:#7FA6FF; --primary-bg:#EAF1FF;
+    --green:#2EA86E; --green-bg:#E8F7EF;
+    --red:#F54A45; --red-bg:#FEECEB;
+    --amber:#D25F00; --amber-bg:#FFF3E8;
+    --track:#EDF0F3;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--t1);font-size:14px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;display:flex;min-height:100vh;
+  }
+  ::selection{background:var(--primary-bg);color:var(--primary)}
+
+  /* 侧边导航 */
+  .sidebar{width:224px;flex:none;background:var(--card);border-right:1px solid var(--border);
+    position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+  .brand{display:flex;align-items:center;gap:10px;padding:20px 20px 16px}
+  .logo{width:30px;height:30px;flex:none;border-radius:8px;background:var(--primary);
+    display:flex;align-items:center;justify-content:center}
+  .brand-name{font-size:15px;font-weight:600}
+  .brand-sub{font-size:11px;color:var(--t3);margin-top:1px}
+  nav{flex:1;padding:6px 12px}
+  .nav-title{font-size:11px;color:var(--t3);padding:14px 12px 6px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:7px 12px;margin-bottom:2px;
+    border-radius:8px;font-size:13.5px;color:var(--t2)}
+  .nav-item svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.7;fill:none;
+    stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .nav-item.active{background:var(--primary-bg);color:var(--primary);font-weight:500}
+  .sidebar-foot{border-top:1px solid var(--border);padding:14px 24px;font-size:11px;color:var(--t3)}
+
+  /* 主区 */
+  .main{flex:1;min-width:0}
+  .topbar{position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:14px;height:56px;padding:0 28px}
+  .proj{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;cursor:pointer}
+  .proj .caret{width:12px;height:12px;stroke:var(--t3);stroke-width:2;fill:none;stroke-linecap:round}
+  .chip{font-size:11px;padding:2px 8px;border-radius:6px;background:var(--primary-bg);
+    color:var(--primary);font-weight:500}
+  .topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .search{width:230px;height:32px;background:var(--bg);border-radius:8px;display:flex;align-items:center;
+    gap:8px;padding:0 12px;font-size:12.5px;color:var(--t3)}
+  .search svg{width:14px;height:14px;stroke:var(--t3);stroke-width:1.8;fill:none;stroke-linecap:round}
+  .search .kbd{margin-left:auto;font-size:11px;color:var(--t3)}
+  .btn{height:32px;padding:0 14px;border:none;border-radius:8px;background:var(--primary);color:#fff;
+    font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit}
+  .btn svg{width:14px;height:14px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round}
+  .icon-btn{position:relative;width:32px;height:32px;border:none;background:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;border-radius:8px}
+  .icon-btn svg{width:18px;height:18px;stroke:var(--t2);stroke-width:1.7;fill:none;
+    stroke-linecap:round;stroke-linejoin:round}
+  .icon-btn i{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--red);
+    border-radius:50%;border:1.5px solid #fff}
+  .ava{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;
+    justify-content:center;font-size:12px;font-weight:600;flex:none}
+  .ava.blue{background:var(--primary)} .ava.teal{background:#00B2A9} .ava.orange{background:#FF7D00}
+  .ava.green{background:var(--green)} .ava.sky{background:#0FA6E8} .ava.ink{background:#646A73}
+  .mini-ava{width:20px;height:20px;font-size:9.5px;border-radius:50%}
+
+  .content{max-width:1200px;margin:0 auto;padding:24px 28px 56px}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+  .card-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .card-title{font-size:15px;font-weight:600}
+  .card-extra{margin-left:auto;font-size:12px;color:var(--t3);display:flex;align-items:center;gap:10px}
+  .ghost-btn{height:32px;padding:0 14px;border:1px solid var(--border);border-radius:8px;background:var(--card);
+    color:var(--t2);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit}
+
+  /* 页头 */
+  .page-head{display:flex;align-items:flex-end;margin-bottom:20px}
+  h1{font-size:24px;font-weight:600}
+  .page-meta{font-size:13px;color:var(--t3);margin-top:6px}
+  .page-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+
+  /* 统计条 */
+  .stat-strip{display:flex;gap:16px;margin-bottom:16px}
+  .stat{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px}
+  .stat .v{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
+  .stat .k{font-size:12px;color:var(--t3);margin-top:4px}
+  .stat .sub{font-size:11px;color:var(--t3);margin-top:2px}
+  .stat.warn .v{color:var(--amber)}
+  .stat.ok .v{color:var(--green)}
+
+  /* 筛选栏 */
+  .filter-bar{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .filter-item{display:flex;align-items:center;gap:6px}
+  .filter-label{font-size:12.5px;color:var(--t3)}
+  .filter-chip{
+    font-size:12.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--border);
+    background:var(--card);color:var(--t2);cursor:pointer;font-family:inherit;
+  }
+  .filter-chip.active{border-color:var(--primary);background:var(--primary-bg);color:var(--primary)}
+
+  /* MR 列表 */
+  .table-card{padding:0;overflow:hidden}
+  .table-head,.table-row{display:flex;align-items:center;padding:12px 20px;gap:0}
+  .table-head{border-bottom:1px solid var(--border);font-size:12px;color:var(--t3);font-weight:500}
+  .table-row{border-bottom:1px solid var(--border)}
+  .table-row:last-of-type{border-bottom:none}
+  .table-row:hover{background:#FAFBFC}
+  .col-mr{width:64px;flex:none;font-variant-numeric:tabular-nums}
+  .col-info{flex:1;min-width:260px}
+  .col-branch{width:230px;flex:none}
+  .col-diff{width:110px;flex:none;text-align:center}
+  .col-ci{width:70px;flex:none;text-align:center}
+  .col-reviewers{width:130px;flex:none}
+  .col-status{width:76px;flex:none;text-align:center}
+  .col-updated{width:86px;flex:none;font-variant-numeric:tabular-nums}
+
+  .mr-id{font-size:12.5px;color:var(--t2);font-variant-numeric:tabular-nums}
+  .mr-title{font-size:13.5px;color:var(--t1);font-weight:500}
+  .mr-meta{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;color:var(--t3)}
+  .branch{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-variant-numeric:tabular-nums}
+  .branch svg{width:13px;height:13px;stroke:var(--t3);stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .branch .b{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    background:var(--track);padding:1px 7px;border-radius:5px;color:var(--t2);font-size:11.5px}
+  .branch .arrow{color:var(--t3)}
+  .diff{font-size:12px;font-variant-numeric:tabular-nums}
+  .diff .add{color:var(--green);font-weight:600}
+  .diff .del{color:var(--red);font-weight:600;margin-left:8px}
+  .diff-bar{display:flex;height:4px;border-radius:2px;overflow:hidden;margin-top:5px;background:var(--track)}
+  .diff-bar .a{background:var(--green)} .diff-bar .d{background:var(--red)}
+  .ci{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:500}
+  .ci.pass{color:var(--green)}
+  .ci.fail{color:var(--red)}
+  .ci.run{color:var(--primary)}
+  .ci svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .reviewers{display:flex;align-items:center}
+  .reviewers .mini-ava{margin-left:-5px;border:2px solid #fff}
+  .reviewers .mini-ava:first-child{margin-left:0}
+  .reviewers .cnt{font-size:11px;color:var(--t3);margin-left:7px}
+  .status{
+    display:inline-flex;align-items:center;gap:4px;
+    font-size:11.5px;padding:2px 8px;border-radius:5px;font-weight:500;
+  }
+  .status.review{background:var(--amber-bg);color:var(--amber)}
+  .status.approved{background:var(--green-bg);color:var(--green)}
+  .status.changes{background:var(--red-bg);color:var(--red)}
+  .status.merged{background:var(--primary-bg);color:var(--primary)}
+  .status.draft{background:var(--track);color:var(--t3)}
+  .updated{font-size:12px;color:var(--t3)}
+
+  /* 分页 */
+  .pagination{display:flex;align-items:center;justify-content:flex-end;gap:8px;
+    padding:14px 20px;border-top:1px solid var(--border)}
+  .page-btn{min-width:30px;height:30px;padding:0 8px;border:1px solid var(--border);border-radius:7px;
+    background:var(--card);color:var(--t2);font-size:12.5px;cursor:pointer;font-family:inherit;
+    display:flex;align-items:center;justify-content:center}
+  .page-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .page-info{font-size:12px;color:var(--t3);margin-right:8px}
+
+  .rise{animation:rise .45s ease-out both}
+  .d1{animation-delay:.04s}.d2{animation-delay:.1s}.d3{animation-delay:.16s}.d4{animation-delay:.22s}.d5{animation-delay:.28s}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  @media (max-width:1150px){
+    .table-head{display:none}
+    .table-row{flex-wrap:wrap;gap:10px}
+    .col-info{flex-basis:100%}
+    .col-branch,.col-diff,.col-ci,.col-reviewers,.col-status,.col-updated{width:auto;text-align:left}
+  }
+  @media (max-width:880px){
+    .sidebar,.search{display:none}
+    .content{padding:20px 16px 48px}
+    .topbar{padding:0 16px}
+    .stat-strip{flex-wrap:wrap}
+    .stat{flex:1 1 calc(50% - 8px)}
+  }
+</style>
+</head>
+<body>
+
+  <!-- 侧边导航 -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">
+        <svg width="16" height="16" viewBox="0 0 21 16"><g fill="#fff"><rect x="3" y="2" width="3.6" height="12" rx="1.2"/><rect x="8.7" y="2" width="3.6" height="8" rx="1.2"/><rect x="14.4" y="2" width="3.6" height="10" rx="1.2"/></g></svg>
+      </div>
+      <div><div class="brand-name">清流</div><div class="brand-sub">研发项目管理</div></div>
+    </div>
+    <nav>
+      <div class="nav-title">工作台</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.8V20h13V9.8"/></svg>概览</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="12" cy="10" r="2.4"/><path d="M7.6 19c.8-2.3 2.4-3.5 4.4-3.5s3.6 1.2 4.4 3.5"/></svg>我的工作</div>
+      <div class="nav-title">研发</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4.5 13 6.6 6.4A2 2 0 0 1 8.5 5h7a2 2 0 0 1 1.9 1.4L19.5 13"/><path d="M4.5 13v5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5"/><path d="M4.5 13H9l1.3 2.4h3.4L15 13h4.5"/></svg>需求池</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2.5"/><path d="M8 3.2V7M16 3.2V7M4 10.5h16"/></svg>迭代规划</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="4.6" height="16" rx="1.4"/><rect x="10.4" y="4" width="4.6" height="10" rx="1.4"/><rect x="16.8" y="4" width="3.2" height="13" rx="1.4"/></svg>任务看板</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="4.8"/><path d="M9.8 9.4a2.8 2.8 0 0 1 4.4 0"/><path d="M12 8.7V6.3M8 10.5 6.2 8.7M16 10.5l1.8-1.8M7.2 13.5H4.6M19.4 13.5h-2.6M8 16.5l-1.8 1.8M16 16.5l1.8 1.8"/></svg>缺陷追踪</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="m8.5 8-4.2 4 4.2 4M15.5 8l4.2 4-4.2 4"/></svg>代码评审</div>
+      <div class="nav-title">度量</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24"><path d="m4 17 5-5 3.5 3.5L20 9"/><path d="M14.8 9H20v5.2"/></svg>燃尽与流速</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3 2.1"/></svg>工时统计</div>
+      <div class="nav-title">设置</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><path d="M3.8 19c.7-3 2.7-4.6 5.2-4.6s4.5 1.6 5.2 4.6"/><path d="M15.5 6.3a3.2 3.2 0 0 1 0 5.6M17.3 14.7c1.6.7 2.7 2.1 3.1 4.3"/></svg>成员与权限</div>
+    </nav>
+    <div class="sidebar-foot">清流 v2.4.0</div>
+  </aside>
+
+  <!-- 主区 -->
+  <div class="main">
+    <header class="topbar">
+      <div class="proj">电商中台重构计划<svg class="caret" viewBox="0 0 12 12"><path d="m2.5 4.5 3.5 3.5 3.5-3.5"/></svg></div>
+      <span class="chip">S24 进行中</span>
+      <div class="topbar-right">
+        <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>搜索 MR / 分支<span class="kbd">⌘K</span></div>
+        <button class="btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>发起评审</button>
+        <button class="icon-btn"><svg viewBox="0 0 24 24"><path d="M6 9.5a6 6 0 1 1 12 0c0 4.8 1.8 5.8 1.8 5.8H4.2S6 14.3 6 9.5"/><path d="M10 19.5a2.2 2.2 0 0 0 4 0"/></svg><i></i></button>
+        <div class="ava blue">陈</div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- 页头 -->
+      <div class="page-head rise d1">
+        <div>
+          <h1>代码评审</h1>
+          <div class="page-meta">跟踪合并请求的评审进度与质量</div>
+        </div>
+        <div class="page-right">
+          <button class="ghost-btn">评审规范</button>
+          <button class="ghost-btn">导出</button>
+        </div>
+      </div>
+
+      <!-- 统计条 -->
+      <div class="stat-strip rise d2">
+        <div class="stat warn"><div class="v">6</div><div class="k">待我评审</div><div class="sub">2 个超过 24h 未处理</div></div>
+        <div class="stat"><div class="v">9</div><div class="k">评审中</div><div class="sub">平均评审时长 5.4 小时</div></div>
+        <div class="stat ok"><div class="v">14</div><div class="k">本周已合并</div><div class="sub">一次通过率 71%</div></div>
+        <div class="stat"><div class="v">3</div><div class="k">被驳回待修改</div><div class="sub">主要来自支付网关模块</div></div>
+      </div>
+
+      <!-- 筛选栏 -->
+      <div class="filter-bar rise d3">
+        <div class="filter-item">
+          <span class="filter-label">状态</span>
+          <button class="filter-chip active">全部 18</button>
+          <button class="filter-chip">评审中 9</button>
+          <button class="filter-chip">已通过 4</button>
+          <button class="filter-chip">待修改 3</button>
+          <button class="filter-chip">已合并 14</button>
+        </div>
+        <div class="filter-item">
+          <span class="filter-label">与我相关</span>
+          <button class="filter-chip">我发起的</button>
+          <button class="filter-chip">待我评审 6</button>
+        </div>
+        <div class="filter-item">
+          <span class="filter-label">迭代</span>
+          <button class="filter-chip">S24</button>
+        </div>
+      </div>
+
+      <!-- MR 列表 -->
+      <div class="card table-card rise d4">
+        <div class="table-head">
+          <div class="col-mr">编号</div>
+          <div class="col-info">标题</div>
+          <div class="col-branch">分支</div>
+          <div class="col-diff">变更</div>
+          <div class="col-ci">CI</div>
+          <div class="col-reviewers">评审人</div>
+          <div class="col-status">状态</div>
+          <div class="col-updated">更新</div>
+        </div>
+
+        <div class="table-row">
+          <div class="col-mr mr-id">!482</div>
+          <div class="col-info">
+            <div class="mr-title">收银台组件重构：支付方式选择</div>
+            <div class="mr-meta"><span class="mini-ava ava orange">陈</span>陈砚舟 · 关联任务 T-311 · S24</div>
+          </div>
+          <div class="col-branch">
+            <span class="branch"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="6" r="2.4"/><path d="M6 8.4v7.2M18 8.4c0 4-4.5 4.6-9 5.2"/></svg><span class="b">feat/cashier-pay</span><span class="arrow">→</span><span class="b">develop</span></span>
+          </div>
+          <div class="col-diff">
+            <div class="diff"><span class="add">+486</span><span class="del">−192</span></div>
+            <div class="diff-bar"><i class="a" style="width:72%"></i><i class="d" style="width:28%"></i></div>
+          </div>
+          <div class="col-ci"><span class="ci pass"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>通过</span></div>
+          <div class="col-reviewers"><div class="reviewers"><span class="mini-ava ava green">顾</span><span class="mini-ava ava teal">林</span><span class="cnt">1/2 已评</span></div></div>
+          <div class="col-status"><span class="status review">评审中</span></div>
+          <div class="col-updated updated">13:47</div>
+        </div>
+
+        <div class="table-row">
+          <div class="col-mr mr-id">!481</div>
+          <div class="col-info">
+            <div class="mr-title">渠道网关超时熔断与降级策略</div>
+            <div class="mr-meta"><span class="mini-ava ava teal">林</span>林晚 · 关联任务 T-308 · S24</div>
+          </div>
+          <div class="col-branch">
+            <span class="branch"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="6" r="2.4"/><path d="M6 8.4v7.2M18 8.4c0 4-4.5 4.6-9 5.2"/></svg><span class="b">feat/gateway-fuse</span><span class="arrow">→</span><span class="b">develop</span></span>
+          </div>
+          <div class="col-diff">
+            <div class="diff"><span class="add">+312</span><span class="del">−45</span></div>
+            <div class="diff-bar"><i class="a" style="width:87%"></i><i class="d" style="width:13%"></i></div>
+          </div>
+          <div class="col-ci"><span class="ci run"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.6V12l3 2.1"/></svg>运行中</span></div>
+          <div class="col-reviewers"><div class="reviewers"><span class="mini-ava ava orange">陈</span><span class="mini-ava ava ink">陆</span><span class="cnt">0/2 已评</span></div></div>
+          <div class="col-status"><span class="status review">评审中</span></div>
+          <div class="col-updated updated">11:20</div>
+        </div>
+
+        <div class="table-row">
+          <div class="col-mr mr-id">!479</div>
+          <div class="col-info">
+            <div class="mr-title">退款回调幂等处理（修复 B-241）</div>
+            <div class="mr-meta"><span class="mini-ava ava teal">林</span>林晚 · 关联缺陷 B-241 · S24</div>
+          </div>
+          <div class="col-branch">
+            <span class="branch"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="6" r="2.4"/><path d="M6 8.4v7.2M18 8.4c0 4-4.5 4.6-9 5.2"/></svg><span class="b">fix/refund-idem</span><span class="arrow">→</span><span class="b">hotfix/s24</span></span>
+          </div>
+          <div class="col-diff">
+            <div class="diff"><span class="add">+98</span><span class="del">−61</span></div>
+            <div class="diff-bar"><i class="a" style="width:62%"></i><i class="d" style="width:38%"></i></div>
+          </div>
+          <div class="col-ci"><span class="ci fail"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>失败</span></div>
+          <div class="col-reviewers"><div class="reviewers"><span class="mini-ava ava orange">陈</span><span class="cnt">1/1 已评</span></div></div>
+          <div class="col-status"><span class="status changes">待修改</span></div>
+          <div class="col-updated updated">10:52</div>
+        </div>
+
+        <div class="table-row">
+          <div class="col-mr mr-id">!478</div>
+          <div class="col-info">
+            <div class="mr-title">分账流水 T+1 对账定时任务</div>
+            <div class="mr-meta"><span class="mini-ava ava teal">林</span>林晚 · 关联任务 T-309 · S24</div>
+          </div>
+          <div class="col-branch">
+            <span class="branch"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="6" r="2.4"/><path d="M6 8.4v7.2M18 8.4c0 4-4.5 4.6-9 5.2"/></svg><span class="b">feat/recon-job</span><span class="arrow">→</span><span class="b">develop</span></span>
+          </div>
+          <div class="col-diff">
+            <div class="diff"><span class="add">+564</span><span class="del">−28</span></div>
+            <div class="diff-bar"><i class="a" style="width:95%"></i><i class="d" style="width:5%"></i></div>
+          </div>
+          <div class="col-ci"><span class="ci pass"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>通过</span></div>
+          <div class="col-reviewers"><div class="reviewers"><span class="mini-ava ava orange">陈</span><span class="mini-ava ava ink">陆</span><span class="cnt">2/2 已评</span></div></div>
+          <div class="col-status"><span class="status approved">已通过</span></div>
+          <div class="col-updated updated">昨天</div>
+        </div>
+
+        <div class="table-row">
+          <div class="col-mr mr-id">!476</div>
+          <div class="col-info">
+            <div class="mr-title">银行卡四要素校验组件</div>
+            <div class="mr-meta"><span class="mini-ava ava green">顾</span>顾之遥 · 关联任务 T-305 · S24</div>
+          </div>
+          <div class="col-branch">
+            <span class="branch"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="6" r="2.4"/><path d="M6 8.4v7.2M18 8.4c0 4-4.5 4.6-9 5.2"/></svg><span class="b">feat/card-verify</span><span class="arrow">→</span><span class="b">develop</span></span>
+          </div>
+          <div class="col-diff">
+            <div class="diff"><span class="add">+203</span><span class="del">−12</span></div>
+            <div class="diff-bar"><i class="a" style="width:94%"></i><i class="d" style="width:6%"></i></div>
+          </div>
+          <div class="col-ci"><span class="ci pass"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>通过</span></div>
+          <div class="col-reviewers"><div class="reviewers"><span class="mini-ava ava orange">陈</span><span class="cnt">1/1 已评</span></div></div>
+          <div class="col-status"><span class="status approved">已通过</span></div>
+          <div class="col-updated updated">昨天</div>
+        </div>
+
+        <div class="table-row">
+          <div class="col-mr mr-id">!475</div>
+          <div class="col-info">
+            <div class="mr-title">灰度发布配置中心接入（草稿）</div>
+            <div class="mr-meta"><span class="mini-ava ava ink">陆</span>陆沉 · 关联任务 T-315 · S24</div>
+          </div>
+          <div class="col-branch">
+            <span class="branch"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="6" r="2.4"/><path d="M6 8.4v7.2M18 8.4c0 4-4.5 4.6-9 5.2"/></svg><span class="b">feat/gray-config</span><span class="arrow">→</span><span class="b">develop</span></span>
+          </div>
+          <div class="col-diff">
+            <div class="diff"><span class="add">+89</span><span class="del">−4</span></div>
+            <div class="diff-bar"><i class="a" style="width:96%"></i><i class="d" style="width:4%"></i></div>
+          </div>
+          <div class="col-ci"><span class="ci run"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.6V12l3 2.1"/></svg>运行中</span></div>
+          <div class="col-reviewers"><div class="reviewers"><span class="cnt" style="margin-left:0">未指派</span></div></div>
+          <div class="col-status"><span class="status draft">草稿</span></div>
+          <div class="col-updated updated">10.08</div>
+        </div>
+
+        <div class="table-row">
+          <div class="col-mr mr-id">!473</div>
+          <div class="col-info">
+            <div class="mr-title">统一支付路由网关（核心链路）</div>
+            <div class="mr-meta"><span class="mini-ava ava teal">林</span>林晚 · 关联任务 T-298 · S24</div>
+          </div>
+          <div class="col-branch">
+            <span class="branch"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="6" r="2.4"/><path d="M6 8.4v7.2M18 8.4c0 4-4.5 4.6-9 5.2"/></svg><span class="b">feat/pay-router</span><span class="arrow">→</span><span class="b">develop</span></span>
+          </div>
+          <div class="col-diff">
+            <div class="diff"><span class="add">+1,208</span><span class="del">−356</span></div>
+            <div class="diff-bar"><i class="a" style="width:77%"></i><i class="d" style="width:23%"></i></div>
+          </div>
+          <div class="col-ci"><span class="ci pass"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>通过</span></div>
+          <div class="col-reviewers"><div class="reviewers"><span class="mini-ava ava orange">陈</span><span class="mini-ava ava ink">陆</span><span class="cnt">2/2 已评</span></div></div>
+          <div class="col-status"><span class="status merged">已合并</span></div>
+          <div class="col-updated updated">10.07</div>
+        </div>
+
+        <div class="pagination">
+          <span class="page-info">共 18 条，当前第 1 页</span>
+          <button class="page-btn">‹</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">›</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+</body>
+</html>
